@@ -1,0 +1,23 @@
+# 编译输出
+*.o
+*.bin
+*.iso
+*.elf
+*.img
+
+# 日志文件
+*.log
+serial_output.log
+qemu.log
+
+# 网络转储文件
+*.pcap
+
+# 临时文件
+*~
+*.swp
+.DS_Store
+
+# 特定的输出目录
+/build/
+/isodir/
