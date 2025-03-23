@@ -1,0 +1,853 @@
+Serial port initialized
+
+=== RTL8139 Initialization ===
+RTL8139: Debug output enabled status: OFF (disable_rtl_debug=true)
+RTL8139 I/O Base: 0x0xC000
+ARP cache cleared
+ARP initialized
+Network initialized: IP 10.0.2.15
+
+=== MiniOS ICMP Client Ready ===
+System will send PING with 'hello, world' to host
+System IP: 10.0.2.15
+Target IP (gateway): 10.0.2.2
+Sending ARP request to resolve gateway MAC...
+Sending ARP request for IP: 10.0.2.2
+ARP packet prepared, sending...
+RX packet detected, processing...
+Received ARP packet: REQUEST
+From IP: 10.0.2.2 MAC: 0x52:0x55:0x0A:0x00:0x02:0x02
+Added new ARP cache entry for IP: 10.0.2.2
+Received ARP request for our IP, responding...
+ARP reply sent
+MAC found in cache for IP: 10.0.2.2
+Gateway MAC resolved successfully: 0x52:0x55:0x0A:0x00:0x02:0x02
+
+=== SENDING ICMP ECHO REQUEST ===
+Target IP: 10.0.2.2
+Resolving IP: 10.0.2.2
+MAC found in cache for IP: 10.0.2.2
+Target MAC: 0x52:0x55:0x0A:0x00:0x02:0x02
+Packet length: 54 bytes
+Data: "hello,world"
+ICMP Echo Request sent!
+
+=== System ready ===
+Sending pings to gateway 10.0.2.2
+======================================
+
+RX packet detected, processing...
+Received ARP packet: REPLY
+From IP: 10.0.2.2 MAC: 0x52:0x55:0x0A:0x00:0x02:0x02
+Updated existing ARP cache entry for IP: 10.0.2.2
+RX packet detected, processing...
+IP packet - SRC: 10.0.2.2 DST: 10.0.2.15
+IP packet is for us, processing...
+Received ICMP packet
+
+!!! ICMP PACKET !!!
+Type: 0 (ECHO REPLY) Code: 0
+From IP: 10.0.2.2
+Data (18 bytes): 0x00 0x00 0x00 0x00 0x00 0x00 0x00 0x00 0x00 0x00 0x00 0x00 0x00 0x00 0x00 0x00 
+ASCII: ................
+
+!!! ICMP ECHO REPLY RECEIVED !!!
+From IP: 10.0.2.2
+"
+Hex data: 0x00 0x00 0x00 0x00 0x00 0x00 0x00 0x00 
+                    0x00 0x00 0x00 0x00 0x00 0x00 0x00 0x00 
+                    0x00 0x00 
+=== PING REPLY RECEIVED ===
+From IP: 10.0.2.2
+Data: ""
+=========================
+RX packet detected, processing...
+IP packet - SRC: 10.0.2.2 DST: 10.0.2.15
+IP packet is for us, processing...
+Received ICMP packet
+
+!!! ICMP PACKET !!!
+Type: 0 (ECHO REPLY) Code: 0
+From IP: 10.0.2.2
+Data (18 bytes): 0x68 0x65 0x6C 0x6C 0x6F 0x2C 0x77 0x6F 0x72 0x6C 0x64 0x00 0x00 0x00 0x00 0x00 
+ASCII: hello,world.....
+
+!!! ICMP ECHO REPLY RECEIVED !!!
+From IP: 10.0.2.2
+hdedldldod,dwdodrdlddd"
+Hex data: 0x68 0x65 0x6C 0x6C 0x6F 0x2C 0x77 0x6F 
+                    0x72 0x6C 0x64 0x00 0x00 0x00 0x00 0x00 
+                    0x00 0x00 
+=== PING REPLY RECEIVED ===
+From IP: 10.0.2.2
+Data: "hddeddlddlddodd,ddwddoddrddlddddd"
+=========================
+
+Sending periodic PING to gateway...
+
+=== SENDING ICMP ECHO REQUEST ===
+Target IP: 10.0.2.2
+Resolving IP: 10.0.2.2
+MAC found in cache for IP: 10.0.2.2
+Target MAC: 0x52:0x55:0x0A:0x00:0x02:0x02
+Packet length: 54 bytes
+Data: "hello,world"
+ICMP Echo Request sent!
+RX packet detected, processing...
+IP packet - SRC: 10.0.2.2 DST: 10.0.2.15
+IP packet is for us, processing...
+Received ICMP packet
+
+!!! ICMP PACKET !!!
+Type: 0 (ECHO REPLY) Code: 0
+From IP: 10.0.2.2
+Data (18 bytes): 0x68 0x65 0x6C 0x6C 0x6F 0x2C 0x77 0x6F 0x72 0x6C 0x64 0x00 0x00 0x00 0x00 0x00 
+ASCII: hello,world.....
+
+!!! ICMP ECHO REPLY RECEIVED !!!
+From IP: 10.0.2.2
+hdedldldod,dwdodrdlddd"
+Hex data: 0x68 0x65 0x6C 0x6C 0x6F 0x2C 0x77 0x6F 
+                    0x72 0x6C 0x64 0x00 0x00 0x00 0x00 0x00 
+                    0x00 0x00 
+=== PING REPLY RECEIVED ===
+From IP: 10.0.2.2
+Data: "hddeddlddlddodd,ddwddoddrddlddddd"
+=========================
+
+Sending periodic PING to gateway...
+
+=== SENDING ICMP ECHO REQUEST ===
+Target IP: 10.0.2.2
+Resolving IP: 10.0.2.2
+MAC found in cache for IP: 10.0.2.2
+Target MAC: 0x52:0x55:0x0A:0x00:0x02:0x02
+Packet length: 54 bytes
+Data: "hello,world"
+ICMP Echo Request sent!
+RX packet detected, processing...
+IP packet - SRC: 10.0.2.2 DST: 10.0.2.15
+IP packet is for us, processing...
+Received ICMP packet
+
+!!! ICMP PACKET !!!
+Type: 0 (ECHO REPLY) Code: 0
+From IP: 10.0.2.2
+Data (18 bytes): 0x68 0x65 0x6C 0x6C 0x6F 0x2C 0x77 0x6F 0x72 0x6C 0x64 0x00 0x00 0x00 0x00 0x00 
+ASCII: hello,world.....
+
+!!! ICMP ECHO REPLY RECEIVED !!!
+From IP: 10.0.2.2
+hdedldldod,dwdodrdlddd"
+Hex data: 0x68 0x65 0x6C 0x6C 0x6F 0x2C 0x77 0x6F 
+                    0x72 0x6C 0x64 0x00 0x00 0x00 0x00 0x00 
+                    0x00 0x00 
+=== PING REPLY RECEIVED ===
+From IP: 10.0.2.2
+Data: "hddeddlddlddodd,ddwddoddrddlddddd"
+=========================
+
+Sending periodic PING to gateway...
+
+=== SENDING ICMP ECHO REQUEST ===
+Target IP: 10.0.2.2
+Resolving IP: 10.0.2.2
+MAC found in cache for IP: 10.0.2.2
+Target MAC: 0x52:0x55:0x0A:0x00:0x02:0x02
+Packet length: 54 bytes
+Data: "hello,world"
+ICMP Echo Request sent!
+RX packet detected, processing...
+IP packet - SRC: 10.0.2.2 DST: 10.0.2.15
+IP packet is for us, processing...
+Received ICMP packet
+
+!!! ICMP PACKET !!!
+Type: 0 (ECHO REPLY) Code: 0
+From IP: 10.0.2.2
+Data (18 bytes): 0x68 0x65 0x6C 0x6C 0x6F 0x2C 0x77 0x6F 0x72 0x6C 0x64 0x00 0x00 0x00 0x00 0x00 
+ASCII: hello,world.....
+
+!!! ICMP ECHO REPLY RECEIVED !!!
+From IP: 10.0.2.2
+hdedldldod,dwdodrdlddd"
+Hex data: 0x68 0x65 0x6C 0x6C 0x6F 0x2C 0x77 0x6F 
+                    0x72 0x6C 0x64 0x00 0x00 0x00 0x00 0x00 
+                    0x00 0x00 
+=== PING REPLY RECEIVED ===
+From IP: 10.0.2.2
+Data: "hddeddlddlddodd,ddwddoddrddlddddd"
+=========================
+
+Sending periodic PING to gateway...
+
+=== SENDING ICMP ECHO REQUEST ===
+Target IP: 10.0.2.2
+Resolving IP: 10.0.2.2
+MAC found in cache for IP: 10.0.2.2
+Target MAC: 0x52:0x55:0x0A:0x00:0x02:0x02
+Packet length: 54 bytes
+Data: "hello,world"
+ICMP Echo Request sent!
+RX packet detected, processing...
+IP packet - SRC: 10.0.2.2 DST: 10.0.2.15
+IP packet is for us, processing...
+Received ICMP packet
+
+!!! ICMP PACKET !!!
+Type: 0 (ECHO REPLY) Code: 0
+From IP: 10.0.2.2
+Data (18 bytes): 0x68 0x65 0x6C 0x6C 0x6F 0x2C 0x77 0x6F 0x72 0x6C 0x64 0x00 0x00 0x00 0x00 0x00 
+ASCII: hello,world.....
+
+!!! ICMP ECHO REPLY RECEIVED !!!
+From IP: 10.0.2.2
+hdedldldod,dwdodrdlddd"
+Hex data: 0x68 0x65 0x6C 0x6C 0x6F 0x2C 0x77 0x6F 
+                    0x72 0x6C 0x64 0x00 0x00 0x00 0x00 0x00 
+                    0x00 0x00 
+=== PING REPLY RECEIVED ===
+From IP: 10.0.2.2
+Data: "hddeddlddlddodd,ddwddoddrddlddddd"
+=========================
+
+Sending periodic PING to gateway...
+
+=== SENDING ICMP ECHO REQUEST ===
+Target IP: 10.0.2.2
+Resolving IP: 10.0.2.2
+MAC found in cache for IP: 10.0.2.2
+Target MAC: 0x52:0x55:0x0A:0x00:0x02:0x02
+Packet length: 54 bytes
+Data: "hello,world"
+ICMP Echo Request sent!
+RX packet detected, processing...
+IP packet - SRC: 10.0.2.2 DST: 10.0.2.15
+IP packet is for us, processing...
+Received ICMP packet
+
+!!! ICMP PACKET !!!
+Type: 0 (ECHO REPLY) Code: 0
+From IP: 10.0.2.2
+Data (18 bytes): 0x68 0x65 0x6C 0x6C 0x6F 0x2C 0x77 0x6F 0x72 0x6C 0x64 0x00 0x00 0x00 0x00 0x00 
+ASCII: hello,world.....
+
+!!! ICMP ECHO REPLY RECEIVED !!!
+From IP: 10.0.2.2
+hdedldldod,dwdodrdlddd"
+Hex data: 0x68 0x65 0x6C 0x6C 0x6F 0x2C 0x77 0x6F 
+                    0x72 0x6C 0x64 0x00 0x00 0x00 0x00 0x00 
+                    0x00 0x00 
+=== PING REPLY RECEIVED ===
+From IP: 10.0.2.2
+Data: "hddeddlddlddodd,ddwddoddrddlddddd"
+=========================
+
+Sending periodic PING to gateway...
+
+=== SENDING ICMP ECHO REQUEST ===
+Target IP: 10.0.2.2
+Resolving IP: 10.0.2.2
+MAC found in cache for IP: 10.0.2.2
+Target MAC: 0x52:0x55:0x0A:0x00:0x02:0x02
+Packet length: 54 bytes
+Data: "hello,world"
+ICMP Echo Request sent!
+RX packet detected, processing...
+IP packet - SRC: 10.0.2.2 DST: 10.0.2.15
+IP packet is for us, processing...
+Received ICMP packet
+
+!!! ICMP PACKET !!!
+Type: 0 (ECHO REPLY) Code: 0
+From IP: 10.0.2.2
+Data (18 bytes): 0x68 0x65 0x6C 0x6C 0x6F 0x2C 0x77 0x6F 0x72 0x6C 0x64 0x00 0x00 0x00 0x00 0x00 
+ASCII: hello,world.....
+
+!!! ICMP ECHO REPLY RECEIVED !!!
+From IP: 10.0.2.2
+hdedldldod,dwdodrdlddd"
+Hex data: 0x68 0x65 0x6C 0x6C 0x6F 0x2C 0x77 0x6F 
+                    0x72 0x6C 0x64 0x00 0x00 0x00 0x00 0x00 
+                    0x00 0x00 
+=== PING REPLY RECEIVED ===
+From IP: 10.0.2.2
+Data: "hddeddlddlddodd,ddwddoddrddlddddd"
+=========================
+
+Sending periodic PING to gateway...
+
+=== SENDING ICMP ECHO REQUEST ===
+Target IP: 10.0.2.2
+Resolving IP: 10.0.2.2
+MAC found in cache for IP: 10.0.2.2
+Target MAC: 0x52:0x55:0x0A:0x00:0x02:0x02
+Packet length: 54 bytes
+Data: "hello,world"
+ICMP Echo Request sent!
+RX packet detected, processing...
+IP packet - SRC: 10.0.2.2 DST: 10.0.2.15
+IP packet is for us, processing...
+Received ICMP packet
+
+!!! ICMP PACKET !!!
+Type: 0 (ECHO REPLY) Code: 0
+From IP: 10.0.2.2
+Data (18 bytes): 0x68 0x65 0x6C 0x6C 0x6F 0x2C 0x77 0x6F 0x72 0x6C 0x64 0x00 0x00 0x00 0x00 0x00 
+ASCII: hello,world.....
+
+!!! ICMP ECHO REPLY RECEIVED !!!
+From IP: 10.0.2.2
+hdedldldod,dwdodrdlddd"
+Hex data: 0x68 0x65 0x6C 0x6C 0x6F 0x2C 0x77 0x6F 
+                    0x72 0x6C 0x64 0x00 0x00 0x00 0x00 0x00 
+                    0x00 0x00 
+=== PING REPLY RECEIVED ===
+From IP: 10.0.2.2
+Data: "hddeddlddlddodd,ddwddoddrddlddddd"
+=========================
+
+Sending periodic PING to gateway...
+
+=== SENDING ICMP ECHO REQUEST ===
+Target IP: 10.0.2.2
+Resolving IP: 10.0.2.2
+MAC found in cache for IP: 10.0.2.2
+Target MAC: 0x52:0x55:0x0A:0x00:0x02:0x02
+Packet length: 54 bytes
+Data: "hello,world"
+ICMP Echo Request sent!
+RX packet detected, processing...
+IP packet - SRC: 10.0.2.2 DST: 10.0.2.15
+IP packet is for us, processing...
+Received ICMP packet
+
+!!! ICMP PACKET !!!
+Type: 0 (ECHO REPLY) Code: 0
+From IP: 10.0.2.2
+Data (18 bytes): 0x68 0x65 0x6C 0x6C 0x6F 0x2C 0x77 0x6F 0x72 0x6C 0x64 0x00 0x00 0x00 0x00 0x00 
+ASCII: hello,world.....
+
+!!! ICMP ECHO REPLY RECEIVED !!!
+From IP: 10.0.2.2
+hdedldldod,dwdodrdlddd"
+Hex data: 0x68 0x65 0x6C 0x6C 0x6F 0x2C 0x77 0x6F 
+                    0x72 0x6C 0x64 0x00 0x00 0x00 0x00 0x00 
+                    0x00 0x00 
+=== PING REPLY RECEIVED ===
+From IP: 10.0.2.2
+Data: "hddeddlddlddodd,ddwddoddrddlddddd"
+=========================
+
+Sending periodic PING to gateway...
+
+=== SENDING ICMP ECHO REQUEST ===
+Target IP: 10.0.2.2
+Resolving IP: 10.0.2.2
+MAC found in cache for IP: 10.0.2.2
+Target MAC: 0x52:0x55:0x0A:0x00:0x02:0x02
+Packet length: 54 bytes
+Data: "hello,world"
+ICMP Echo Request sent!
+RX packet detected, processing...
+IP packet - SRC: 10.0.2.2 DST: 10.0.2.15
+IP packet is for us, processing...
+Received ICMP packet
+
+!!! ICMP PACKET !!!
+Type: 0 (ECHO REPLY) Code: 0
+From IP: 10.0.2.2
+Data (18 bytes): 0x68 0x65 0x6C 0x6C 0x6F 0x2C 0x77 0x6F 0x72 0x6C 0x64 0x00 0x00 0x00 0x00 0x00 
+ASCII: hello,world.....
+
+!!! ICMP ECHO REPLY RECEIVED !!!
+From IP: 10.0.2.2
+hdedldldod,dwdodrdlddd"
+Hex data: 0x68 0x65 0x6C 0x6C 0x6F 0x2C 0x77 0x6F 
+                    0x72 0x6C 0x64 0x00 0x00 0x00 0x00 0x00 
+                    0x00 0x00 
+=== PING REPLY RECEIVED ===
+From IP: 10.0.2.2
+Data: "hddeddlddlddodd,ddwddoddrddlddddd"
+=========================
+
+Sending periodic PING to gateway...
+
+=== SENDING ICMP ECHO REQUEST ===
+Target IP: 10.0.2.2
+Resolving IP: 10.0.2.2
+MAC found in cache for IP: 10.0.2.2
+Target MAC: 0x52:0x55:0x0A:0x00:0x02:0x02
+Packet length: 54 bytes
+Data: "hello,world"
+ICMP Echo Request sent!
+RX packet detected, processing...
+IP packet - SRC: 10.0.2.2 DST: 10.0.2.15
+IP packet is for us, processing...
+Received ICMP packet
+
+!!! ICMP PACKET !!!
+Type: 0 (ECHO REPLY) Code: 0
+From IP: 10.0.2.2
+Data (18 bytes): 0x68 0x65 0x6C 0x6C 0x6F 0x2C 0x77 0x6F 0x72 0x6C 0x64 0x00 0x00 0x00 0x00 0x00 
+ASCII: hello,world.....
+
+!!! ICMP ECHO REPLY RECEIVED !!!
+From IP: 10.0.2.2
+hdedldldod,dwdodrdlddd"
+Hex data: 0x68 0x65 0x6C 0x6C 0x6F 0x2C 0x77 0x6F 
+                    0x72 0x6C 0x64 0x00 0x00 0x00 0x00 0x00 
+                    0x00 0x00 
+=== PING REPLY RECEIVED ===
+From IP: 10.0.2.2
+Data: "hddeddlddlddodd,ddwddoddrddlddddd"
+=========================
+
+Sending periodic PING to gateway...
+
+=== SENDING ICMP ECHO REQUEST ===
+Target IP: 10.0.2.2
+Resolving IP: 10.0.2.2
+MAC found in cache for IP: 10.0.2.2
+Target MAC: 0x52:0x55:0x0A:0x00:0x02:0x02
+Packet length: 54 bytes
+Data: "hello,world"
+ICMP Echo Request sent!
+RX packet detected, processing...
+IP packet - SRC: 10.0.2.2 DST: 10.0.2.15
+IP packet is for us, processing...
+Received ICMP packet
+
+!!! ICMP PACKET !!!
+Type: 0 (ECHO REPLY) Code: 0
+From IP: 10.0.2.2
+Data (18 bytes): 0x68 0x65 0x6C 0x6C 0x6F 0x2C 0x77 0x6F 0x72 0x6C 0x64 0x00 0x00 0x00 0x00 0x00 
+ASCII: hello,world.....
+
+!!! ICMP ECHO REPLY RECEIVED !!!
+From IP: 10.0.2.2
+hdedldldod,dwdodrdlddd"
+Hex data: 0x68 0x65 0x6C 0x6C 0x6F 0x2C 0x77 0x6F 
+                    0x72 0x6C 0x64 0x00 0x00 0x00 0x00 0x00 
+                    0x00 0x00 
+=== PING REPLY RECEIVED ===
+From IP: 10.0.2.2
+Data: "hddeddlddlddodd,ddwddoddrddlddddd"
+=========================
+
+Sending periodic PING to gateway...
+
+=== SENDING ICMP ECHO REQUEST ===
+Target IP: 10.0.2.2
+Resolving IP: 10.0.2.2
+MAC found in cache for IP: 10.0.2.2
+Target MAC: 0x52:0x55:0x0A:0x00:0x02:0x02
+Packet length: 54 bytes
+Data: "hello,world"
+ICMP Echo Request sent!
+RX packet detected, processing...
+IP packet - SRC: 10.0.2.2 DST: 10.0.2.15
+IP packet is for us, processing...
+Received ICMP packet
+
+!!! ICMP PACKET !!!
+Type: 0 (ECHO REPLY) Code: 0
+From IP: 10.0.2.2
+Data (18 bytes): 0x68 0x65 0x6C 0x6C 0x6F 0x2C 0x77 0x6F 0x72 0x6C 0x64 0x00 0x00 0x00 0x00 0x00 
+ASCII: hello,world.....
+
+!!! ICMP ECHO REPLY RECEIVED !!!
+From IP: 10.0.2.2
+hdedldldod,dwdodrdlddd"
+Hex data: 0x68 0x65 0x6C 0x6C 0x6F 0x2C 0x77 0x6F 
+                    0x72 0x6C 0x64 0x00 0x00 0x00 0x00 0x00 
+                    0x00 0x00 
+=== PING REPLY RECEIVED ===
+From IP: 10.0.2.2
+Data: "hddeddlddlddodd,ddwddoddrddlddddd"
+=========================
+
+Sending periodic PING to gateway...
+
+=== SENDING ICMP ECHO REQUEST ===
+Target IP: 10.0.2.2
+Resolving IP: 10.0.2.2
+MAC found in cache for IP: 10.0.2.2
+Target MAC: 0x52:0x55:0x0A:0x00:0x02:0x02
+Packet length: 54 bytes
+Data: "hello,world"
+ICMP Echo Request sent!
+RX packet detected, processing...
+IP packet - SRC: 10.0.2.2 DST: 10.0.2.15
+IP packet is for us, processing...
+Received ICMP packet
+
+!!! ICMP PACKET !!!
+Type: 0 (ECHO REPLY) Code: 0
+From IP: 10.0.2.2
+Data (18 bytes): 0x68 0x65 0x6C 0x6C 0x6F 0x2C 0x77 0x6F 0x72 0x6C 0x64 0x00 0x00 0x00 0x00 0x00 
+ASCII: hello,world.....
+
+!!! ICMP ECHO REPLY RECEIVED !!!
+From IP: 10.0.2.2
+hdedldldod,dwdodrdlddd"
+Hex data: 0x68 0x65 0x6C 0x6C 0x6F 0x2C 0x77 0x6F 
+                    0x72 0x6C 0x64 0x00 0x00 0x00 0x00 0x00 
+                    0x00 0x00 
+=== PING REPLY RECEIVED ===
+From IP: 10.0.2.2
+Data: "hddeddlddlddodd,ddwddoddrddlddddd"
+=========================
+
+Sending periodic PING to gateway...
+
+=== SENDING ICMP ECHO REQUEST ===
+Target IP: 10.0.2.2
+Resolving IP: 10.0.2.2
+MAC found in cache for IP: 10.0.2.2
+Target MAC: 0x52:0x55:0x0A:0x00:0x02:0x02
+Packet length: 54 bytes
+Data: "hello,world"
+ICMP Echo Request sent!
+RX packet detected, processing...
+IP packet - SRC: 10.0.2.2 DST: 10.0.2.15
+IP packet is for us, processing...
+Received ICMP packet
+
+!!! ICMP PACKET !!!
+Type: 0 (ECHO REPLY) Code: 0
+From IP: 10.0.2.2
+Data (18 bytes): 0x68 0x65 0x6C 0x6C 0x6F 0x2C 0x77 0x6F 0x72 0x6C 0x64 0x00 0x00 0x00 0x00 0x00 
+ASCII: hello,world.....
+
+!!! ICMP ECHO REPLY RECEIVED !!!
+From IP: 10.0.2.2
+hdedldldod,dwdodrdlddd"
+Hex data: 0x68 0x65 0x6C 0x6C 0x6F 0x2C 0x77 0x6F 
+                    0x72 0x6C 0x64 0x00 0x00 0x00 0x00 0x00 
+                    0x00 0x00 
+=== PING REPLY RECEIVED ===
+From IP: 10.0.2.2
+Data: "hddeddlddlddodd,ddwddoddrddlddddd"
+=========================
+
+Sending periodic PING to gateway...
+
+=== SENDING ICMP ECHO REQUEST ===
+Target IP: 10.0.2.2
+Resolving IP: 10.0.2.2
+MAC found in cache for IP: 10.0.2.2
+Target MAC: 0x52:0x55:0x0A:0x00:0x02:0x02
+Packet length: 54 bytes
+Data: "hello,world"
+ICMP Echo Request sent!
+RX packet detected, processing...
+IP packet - SRC: 10.0.2.2 DST: 10.0.2.15
+IP packet is for us, processing...
+Received ICMP packet
+
+!!! ICMP PACKET !!!
+Type: 0 (ECHO REPLY) Code: 0
+From IP: 10.0.2.2
+Data (18 bytes): 0x68 0x65 0x6C 0x6C 0x6F 0x2C 0x77 0x6F 0x72 0x6C 0x64 0x00 0x00 0x00 0x00 0x00 
+ASCII: hello,world.....
+
+!!! ICMP ECHO REPLY RECEIVED !!!
+From IP: 10.0.2.2
+hdedldldod,dwdodrdlddd"
+Hex data: 0x68 0x65 0x6C 0x6C 0x6F 0x2C 0x77 0x6F 
+                    0x72 0x6C 0x64 0x00 0x00 0x00 0x00 0x00 
+                    0x00 0x00 
+=== PING REPLY RECEIVED ===
+From IP: 10.0.2.2
+Data: "hddeddlddlddodd,ddwddoddrddlddddd"
+=========================
+
+Sending periodic PING to gateway...
+
+=== SENDING ICMP ECHO REQUEST ===
+Target IP: 10.0.2.2
+Resolving IP: 10.0.2.2
+MAC found in cache for IP: 10.0.2.2
+Target MAC: 0x52:0x55:0x0A:0x00:0x02:0x02
+Packet length: 54 bytes
+Data: "hello,world"
+ICMP Echo Request sent!
+RX packet detected, processing...
+IP packet - SRC: 10.0.2.2 DST: 10.0.2.15
+IP packet is for us, processing...
+Received ICMP packet
+
+!!! ICMP PACKET !!!
+Type: 0 (ECHO REPLY) Code: 0
+From IP: 10.0.2.2
+Data (18 bytes): 0x68 0x65 0x6C 0x6C 0x6F 0x2C 0x77 0x6F 0x72 0x6C 0x64 0x00 0x00 0x00 0x00 0x00 
+ASCII: hello,world.....
+
+!!! ICMP ECHO REPLY RECEIVED !!!
+From IP: 10.0.2.2
+hdedldldod,dwdodrdlddd"
+Hex data: 0x68 0x65 0x6C 0x6C 0x6F 0x2C 0x77 0x6F 
+                    0x72 0x6C 0x64 0x00 0x00 0x00 0x00 0x00 
+                    0x00 0x00 
+=== PING REPLY RECEIVED ===
+From IP: 10.0.2.2
+Data: "hddeddlddlddodd,ddwddoddrddlddddd"
+=========================
+
+Sending periodic PING to gateway...
+
+=== SENDING ICMP ECHO REQUEST ===
+Target IP: 10.0.2.2
+Resolving IP: 10.0.2.2
+MAC found in cache for IP: 10.0.2.2
+Target MAC: 0x52:0x55:0x0A:0x00:0x02:0x02
+Packet length: 54 bytes
+Data: "hello,world"
+ICMP Echo Request sent!
+RX packet detected, processing...
+IP packet - SRC: 10.0.2.2 DST: 10.0.2.15
+IP packet is for us, processing...
+Received ICMP packet
+
+!!! ICMP PACKET !!!
+Type: 0 (ECHO REPLY) Code: 0
+From IP: 10.0.2.2
+Data (18 bytes): 0x68 0x65 0x6C 0x6C 0x6F 0x2C 0x77 0x6F 0x72 0x6C 0x64 0x00 0x00 0x00 0x00 0x00 
+ASCII: hello,world.....
+
+!!! ICMP ECHO REPLY RECEIVED !!!
+From IP: 10.0.2.2
+hdedldldod,dwdodrdlddd"
+Hex data: 0x68 0x65 0x6C 0x6C 0x6F 0x2C 0x77 0x6F 
+                    0x72 0x6C 0x64 0x00 0x00 0x00 0x00 0x00 
+                    0x00 0x00 
+=== PING REPLY RECEIVED ===
+From IP: 10.0.2.2
+Data: "hddeddlddlddodd,ddwddoddrddlddddd"
+=========================
+
+Sending periodic PING to gateway...
+
+=== SENDING ICMP ECHO REQUEST ===
+Target IP: 10.0.2.2
+Resolving IP: 10.0.2.2
+MAC found in cache for IP: 10.0.2.2
+Target MAC: 0x52:0x55:0x0A:0x00:0x02:0x02
+Packet length: 54 bytes
+Data: "hello,world"
+ICMP Echo Request sent!
+RX packet detected, processing...
+IP packet - SRC: 10.0.2.2 DST: 10.0.2.15
+IP packet is for us, processing...
+Received ICMP packet
+
+!!! ICMP PACKET !!!
+Type: 0 (ECHO REPLY) Code: 0
+From IP: 10.0.2.2
+Data (18 bytes): 0x68 0x65 0x6C 0x6C 0x6F 0x2C 0x77 0x6F 0x72 0x6C 0x64 0x00 0x00 0x00 0x00 0x00 
+ASCII: hello,world.....
+
+!!! ICMP ECHO REPLY RECEIVED !!!
+From IP: 10.0.2.2
+hdedldldod,dwdodrdlddd"
+Hex data: 0x68 0x65 0x6C 0x6C 0x6F 0x2C 0x77 0x6F 
+                    0x72 0x6C 0x64 0x00 0x00 0x00 0x00 0x00 
+                    0x00 0x00 
+=== PING REPLY RECEIVED ===
+From IP: 10.0.2.2
+Data: "hddeddlddlddodd,ddwddoddrddlddddd"
+=========================
+
+Sending periodic PING to gateway...
+
+=== SENDING ICMP ECHO REQUEST ===
+Target IP: 10.0.2.2
+Resolving IP: 10.0.2.2
+MAC found in cache for IP: 10.0.2.2
+Target MAC: 0x52:0x55:0x0A:0x00:0x02:0x02
+Packet length: 54 bytes
+Data: "hello,world"
+ICMP Echo Request sent!
+RX packet detected, processing...
+IP packet - SRC: 10.0.2.2 DST: 10.0.2.15
+IP packet is for us, processing...
+Received ICMP packet
+
+!!! ICMP PACKET !!!
+Type: 0 (ECHO REPLY) Code: 0
+From IP: 10.0.2.2
+Data (18 bytes): 0x68 0x65 0x6C 0x6C 0x6F 0x2C 0x77 0x6F 0x72 0x6C 0x64 0x00 0x00 0x00 0x00 0x00 
+ASCII: hello,world.....
+
+!!! ICMP ECHO REPLY RECEIVED !!!
+From IP: 10.0.2.2
+hdedldldod,dwdodrdlddd"
+Hex data: 0x68 0x65 0x6C 0x6C 0x6F 0x2C 0x77 0x6F 
+                    0x72 0x6C 0x64 0x00 0x00 0x00 0x00 0x00 
+                    0x00 0x00 
+=== PING REPLY RECEIVED ===
+From IP: 10.0.2.2
+Data: "hddeddlddlddodd,ddwddoddrddlddddd"
+=========================
+
+Sending periodic PING to gateway...
+
+=== SENDING ICMP ECHO REQUEST ===
+Target IP: 10.0.2.2
+Resolving IP: 10.0.2.2
+MAC found in cache for IP: 10.0.2.2
+Target MAC: 0x52:0x55:0x0A:0x00:0x02:0x02
+Packet length: 54 bytes
+Data: "hello,world"
+ICMP Echo Request sent!
+RX packet detected, processing...
+IP packet - SRC: 10.0.2.2 DST: 10.0.2.15
+IP packet is for us, processing...
+Received ICMP packet
+
+!!! ICMP PACKET !!!
+Type: 0 (ECHO REPLY) Code: 0
+From IP: 10.0.2.2
+Data (18 bytes): 0x68 0x65 0x6C 0x6C 0x6F 0x2C 0x77 0x6F 0x72 0x6C 0x64 0x00 0x00 0x00 0x00 0x00 
+ASCII: hello,world.....
+
+!!! ICMP ECHO REPLY RECEIVED !!!
+From IP: 10.0.2.2
+hdedldldod,dwdodrdlddd"
+Hex data: 0x68 0x65 0x6C 0x6C 0x6F 0x2C 0x77 0x6F 
+                    0x72 0x6C 0x64 0x00 0x00 0x00 0x00 0x00 
+                    0x00 0x00 
+=== PING REPLY RECEIVED ===
+From IP: 10.0.2.2
+Data: "hddeddlddlddodd,ddwddoddrddlddddd"
+=========================
+
+Sending periodic PING to gateway...
+
+=== SENDING ICMP ECHO REQUEST ===
+Target IP: 10.0.2.2
+Resolving IP: 10.0.2.2
+MAC found in cache for IP: 10.0.2.2
+Target MAC: 0x52:0x55:0x0A:0x00:0x02:0x02
+Packet length: 54 bytes
+Data: "hello,world"
+ICMP Echo Request sent!
+RX packet detected, processing...
+IP packet - SRC: 10.0.2.2 DST: 10.0.2.15
+IP packet is for us, processing...
+Received ICMP packet
+
+!!! ICMP PACKET !!!
+Type: 0 (ECHO REPLY) Code: 0
+From IP: 10.0.2.2
+Data (18 bytes): 0x68 0x65 0x6C 0x6C 0x6F 0x2C 0x77 0x6F 0x72 0x6C 0x64 0x00 0x00 0x00 0x00 0x00 
+ASCII: hello,world.....
+
+!!! ICMP ECHO REPLY RECEIVED !!!
+From IP: 10.0.2.2
+hdedldldod,dwdodrdlddd"
+Hex data: 0x68 0x65 0x6C 0x6C 0x6F 0x2C 0x77 0x6F 
+                    0x72 0x6C 0x64 0x00 0x00 0x00 0x00 0x00 
+                    0x00 0x00 
+=== PING REPLY RECEIVED ===
+From IP: 10.0.2.2
+Data: "hddeddlddlddodd,ddwddoddrddlddddd"
+=========================
+
+Sending periodic PING to gateway...
+
+=== SENDING ICMP ECHO REQUEST ===
+Target IP: 10.0.2.2
+Resolving IP: 10.0.2.2
+MAC found in cache for IP: 10.0.2.2
+Target MAC: 0x52:0x55:0x0A:0x00:0x02:0x02
+Packet length: 54 bytes
+Data: "hello,world"
+ICMP Echo Request sent!
+RX packet detected, processing...
+IP packet - SRC: 10.0.2.2 DST: 10.0.2.15
+IP packet is for us, processing...
+Received ICMP packet
+
+!!! ICMP PACKET !!!
+Type: 0 (ECHO REPLY) Code: 0
+From IP: 10.0.2.2
+Data (18 bytes): 0x68 0x65 0x6C 0x6C 0x6F 0x2C 0x77 0x6F 0x72 0x6C 0x64 0x00 0x00 0x00 0x00 0x00 
+ASCII: hello,world.....
+
+!!! ICMP ECHO REPLY RECEIVED !!!
+From IP: 10.0.2.2
+hdedldldod,dwdodrdlddd"
+Hex data: 0x68 0x65 0x6C 0x6C 0x6F 0x2C 0x77 0x6F 
+                    0x72 0x6C 0x64 0x00 0x00 0x00 0x00 0x00 
+                    0x00 0x00 
+=== PING REPLY RECEIVED ===
+From IP: 10.0.2.2
+Data: "hddeddlddlddodd,ddwddoddrddlddddd"
+=========================
+
+Sending periodic PING to gateway...
+
+=== SENDING ICMP ECHO REQUEST ===
+Target IP: 10.0.2.2
+Resolving IP: 10.0.2.2
+MAC found in cache for IP: 10.0.2.2
+Target MAC: 0x52:0x55:0x0A:0x00:0x02:0x02
+Packet length: 54 bytes
+Data: "hello,world"
+ICMP Echo Request sent!
+RX packet detected, processing...
+IP packet - SRC: 10.0.2.2 DST: 10.0.2.15
+IP packet is for us, processing...
+Received ICMP packet
+
+!!! ICMP PACKET !!!
+Type: 0 (ECHO REPLY) Code: 0
+From IP: 10.0.2.2
+Data (18 bytes): 0x68 0x65 0x6C 0x6C 0x6F 0x2C 0x77 0x6F 0x72 0x6C 0x64 0x00 0x00 0x00 0x00 0x00 
+ASCII: hello,world.....
+
+!!! ICMP ECHO REPLY RECEIVED !!!
+From IP: 10.0.2.2
+hdedldldod,dwdodrdlddd"
+Hex data: 0x68 0x65 0x6C 0x6C 0x6F 0x2C 0x77 0x6F 
+                    0x72 0x6C 0x64 0x00 0x00 0x00 0x00 0x00 
+                    0x00 0x00 
+=== PING REPLY RECEIVED ===
+From IP: 10.0.2.2
+Data: "hddeddlddlddodd,ddwddoddrddlddddd"
+=========================
+
+Sending periodic PING to gateway...
+
+=== SENDING ICMP ECHO REQUEST ===
+Target IP: 10.0.2.2
+Resolving IP: 10.0.2.2
+MAC found in cache for IP: 10.0.2.2
+Target MAC: 0x52:0x55:0x0A:0x00:0x02:0x02
+Packet length: 54 bytes
+Data: "hello,world"
+ICMP Echo Request sent!
+RX packet detected, processing...
+IP packet - SRC: 10.0.2.2 DST: 10.0.2.15
+IP packet is for us, processing...
+Received ICMP packet
+
+!!! ICMP PACKET !!!
+Type: 0 (ECHO REPLY) Code: 0
+From IP: 10.0.2.2
+Data (18 bytes): 0x68 0x65 0x6C 0x6C 0x6F 0x2C 0x77 0x6F 0x72 0x6C 0x64 0x00 0x00 0x00 0x00 0x00 
+ASCII: hello,world.....
+
+!!! ICMP ECHO REPLY RECEIVED !!!
+From IP: 10.0.2.2
+hdedldldod,dwdodrdlddd"
+Hex data: 0x68 0x65 0x6C 0x6C 0x6F 0x2C 0x77 0x6F 
+                    0x72 0x6C 0x64 0x00 0x00 0x00 0x00 0x00 
+                    0x00 0x00 
+=== PING REPLY RECEIVED ===
+From IP: 10.0.2.2
+Data: "hddeddlddlddodd,ddwddoddrddlddddd"
+=========================
+

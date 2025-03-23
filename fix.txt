@@ -1,0 +1,1 @@
+        tsd = inl(iobase + RTL8139_REG_TSD0 + ((current_tx_buffer - 1) % 4) * 4);

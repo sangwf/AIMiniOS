@@ -1,0 +1,5 @@
+# Network events
+net_tx_packet(void *queue, const void *data, size_t len) "queue %p data %p len %zd"
+net_rx_packet(void *queue, const void *data, size_t len) "queue %p data %p len %zd"
+net_rx_packet_async(void *queue, const void *data, size_t len) "queue %p data %p len %zd"
+net_queue_flush(void *queue) "queue %p" 

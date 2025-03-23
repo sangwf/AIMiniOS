@@ -1,0 +1,789 @@
+#include "network.h"
+#include "tcp.h"
+#include "io.h"
+#include "terminal.h"
+#include "byteorder.h"
+#include "kernel.h"
+#include "rtl8139.h"
+
+// TCP校验和计算函数声明
+static uint16_t tcp_checksum(struct ip_header* ip, struct tcp_header* tcp, uint8_t* data, uint16_t length);
+
+// 外部变量声明
+extern struct net_device net_dev;
+
+// TCP连接状态
+// TODO: 实现TCP连接状态管理
+// static struct tcp_connection tcp_conn = {0};
+
+// TCP定时器结构
+struct tcp_timer {
+    uint32_t start_time;
+    uint32_t timeout;
+    bool active;
+};
+
+// TCP段结构
+struct tcp_segment {
+    uint8_t* data;
+    uint16_t length;
+    uint32_t seq_num;
+    bool acked;
+    struct tcp_segment* next;
+};
+
+// TCP连接扩展结构
+struct tcp_connection_ext {
+    struct tcp_connection base;  // 基本TCP连接结构
+    struct tcp_timer retransmit_timer;  // 重传定时器
+    struct tcp_timer time_wait_timer;   // TIME_WAIT定时器
+    struct tcp_timer keepalive_timer;   // 保活定时器
+    struct tcp_segment* send_queue;     // 发送队列
+    struct tcp_segment* recv_queue;     // 接收队列
+    uint32_t rto;                      // 重传超时时间
+    uint32_t srtt;                     // 平滑往返时间
+    uint32_t rttvar;                   // 往返时间变化
+    uint16_t mss;                      // 最大段大小
+    uint16_t cwnd;                     // 拥塞窗口
+    uint16_t ssthresh;                 // 慢启动阈值
+    tcp_data_callback data_callback;    // 数据接收回调函数
+};
+
+// TCP连接池
+#define TCP_MAX_CONNECTIONS 16
+static struct tcp_connection_ext tcp_connections_ext[TCP_MAX_CONNECTIONS];
+static struct tcp_connection* tcp_connections = (struct tcp_connection*)tcp_connections_ext;
+
+// TCP重传相关参数
+#define TCP_INIT_RTO     3000  // 初始重传超时时间 (3秒)
+#define TCP_MIN_RTO      1000  // 最小重传超时时间 (1秒)
+#define TCP_MAX_RTO      60000 // 最大重传超时时间 (60秒)
+#define TCP_MAX_RETRIES  3     // 最大重传次数
+
+// TCP定时器相关函数
+static void tcp_start_timer(struct tcp_timer* timer, uint32_t timeout) {
+    timer->start_time = 0; // TODO: 获取当前时间
+    timer->timeout = timeout;
+    timer->active = true;
+}
+
+static void tcp_stop_timer(struct tcp_timer* timer) {
+    timer->active = false;
+}
+
+static bool tcp_update_timer(struct tcp_timer* timer) {
+    if(!timer->active) return false;
+    
+    uint32_t current_time = 0; // TODO: 获取当前时间
+    if(current_time - timer->start_time >= timer->timeout) {
+        timer->active = false;
+        return true;
+    }
+    return false;
+}
+
+// TCP连接初始化
+static void tcp_init_connection(struct tcp_connection_ext* conn) {
+    // 初始化基本连接参数
+    conn->base.local_port = 0;
+    conn->base.remote_port = 0;
+    conn->base.local_ip = 0;
+    conn->base.remote_ip = 0;
+    conn->base.seq_num = 0;
+    conn->base.ack_num = 0;
+    conn->base.window = 0;
+    conn->base.state = TCP_CLOSED;
+    conn->base.retries = 0;
+    
+    // 初始化扩展参数
+    conn->send_queue = NULL;
+    conn->recv_queue = NULL;
+    conn->rto = TCP_INIT_RTO;
+    conn->srtt = 0;
+    conn->rttvar = 0;
+    conn->mss = 1460;  // 标准以太网MTU - IP头 - TCP头
+    conn->cwnd = 1;
+    conn->ssthresh = 65535;
+    conn->data_callback = NULL;
+    
+    // 停止所有定时器
+    tcp_stop_timer(&conn->retransmit_timer);
+    tcp_stop_timer(&conn->time_wait_timer);
+    tcp_stop_timer(&conn->keepalive_timer);
+}
+
+// TCP连接创建
+struct tcp_connection* tcp_create_connection(void) {
+    for(int i = 0; i < TCP_MAX_CONNECTIONS; i++) {
+        if(tcp_connections[i].state == TCP_CLOSED) {
+            tcp_init_connection(&tcp_connections_ext[i]);
+            return &tcp_connections[i];
+        }
+    }
+    return NULL;
+}
+
+// TCP连接释放
+void tcp_free_connection(struct tcp_connection* conn) {
+    struct tcp_connection_ext* conn_ext = (struct tcp_connection_ext*)conn;
+    
+    // 释放发送队列
+    struct tcp_segment* seg = conn_ext->send_queue;
+    while(seg) {
+        struct tcp_segment* next = seg->next;
+        // TODO: 实现内存释放
+        seg = next;
+    }
+    
+    // 释放接收队列
+    seg = conn_ext->recv_queue;
+    while(seg) {
+        struct tcp_segment* next = seg->next;
+        // TODO: 实现内存释放
+        seg = next;
+    }
+    
+    // 初始化连接
+    tcp_init_connection(conn_ext);
+}
+
+// TCP数据发送
+int tcp_send(struct tcp_connection* conn, uint8_t* data, uint16_t length) {
+    struct tcp_connection_ext* conn_ext = (struct tcp_connection_ext*)conn;
+    
+    // 检查连接状态
+    if(conn->state != TCP_ESTABLISHED) {
+        return -1;
+    }
+    
+    // 创建TCP段
+    struct tcp_segment* seg = NULL; // TODO: 实现内存分配
+    if(!seg) {
+        return -1;
+    }
+    
+    // 设置段数据
+    seg->data = data;
+    seg->length = length;
+    seg->seq_num = conn->seq_num;
+    seg->acked = false;
+    seg->next = NULL;
+    
+    // 添加到发送队列
+    if(!conn_ext->send_queue) {
+        conn_ext->send_queue = seg;
+    } else {
+        struct tcp_segment* last = conn_ext->send_queue;
+        while(last->next) {
+            last = last->next;
+        }
+        last->next = seg;
+    }
+    
+    // 更新序列号
+    conn->seq_num += length;
+    
+    // 启动重传定时器
+    tcp_start_timer(&conn_ext->retransmit_timer, conn_ext->rto);
+    
+    return length;
+}
+
+// TCP连接关闭
+void tcp_close(struct tcp_connection* conn) {
+    if(conn->state == TCP_ESTABLISHED) {
+        conn->state = TCP_FIN_WAIT_1;
+        // TODO: 发送FIN包
+    } else {
+        tcp_free_connection(conn);
+    }
+}
+
+// TCP数据接收回调设置
+void tcp_set_data_callback(struct tcp_connection* conn, tcp_data_callback callback) {
+    struct tcp_connection_ext* conn_ext = (struct tcp_connection_ext*)conn;
+    conn_ext->data_callback = callback;
+}
+
+// TCP数据处理
+static void tcp_handle_data(struct tcp_connection* conn, const uint8_t* data, uint16_t length) {
+    struct tcp_connection_ext* conn_ext = (struct tcp_connection_ext*)conn;
+    
+    // 如果有回调函数，直接调用
+    if(conn_ext->data_callback) {
+        conn_ext->data_callback(conn, data, length);
+        return;
+    }
+    
+    // 否则，将数据添加到接收队列
+    struct tcp_segment* seg = NULL; // TODO: 实现内存分配
+    if(!seg) {
+        return;
+    }
+    
+    // 设置段数据
+    seg->data = (uint8_t*)data;  // 注意：这里可能需要复制数据
+    seg->length = length;
+    seg->seq_num = conn->ack_num;
+    seg->acked = false;
+    seg->next = NULL;
+    
+    // 添加到接收队列
+    if(!conn_ext->recv_queue) {
+        conn_ext->recv_queue = seg;
+    } else {
+        struct tcp_segment* last = conn_ext->recv_queue;
+        while(last->next) {
+            last = last->next;
+        }
+        last->next = seg;
+    }
+    
+    // 更新确认号
+    conn->ack_num += length;
+}
+
+// TCP校验和计算
+static uint16_t tcp_checksum(struct ip_header* ip, struct tcp_header* tcp, uint8_t* data, uint16_t length) {
+    uint32_t sum = 0;
+    uint16_t* ptr;
+    
+    // 伪头部
+    struct tcp_pseudo_header pseudo_header = {
+        .src_ip = ip->src_ip,
+        .dest_ip = ip->dest_ip,
+        .zero = 0,
+        .protocol = IP_PROTO_TCP,
+        .tcp_length = htons(sizeof(struct tcp_header) + length)
+    };
+    
+    // 计算伪头部校验和
+    ptr = (uint16_t*)&pseudo_header;
+    for(size_t i = 0; i < sizeof(pseudo_header) / 2; i++) {
+        sum += ntohs(ptr[i]);
+    }
+    
+    // 计算TCP头部校验和
+    ptr = (uint16_t*)tcp;
+    for(size_t i = 0; i < sizeof(struct tcp_header) / 2; i++) {
+        sum += ntohs(ptr[i]);
+    }
+    
+    // 计算数据部分校验和
+    ptr = (uint16_t*)data;
+    size_t words = length / 2;
+    for(size_t i = 0; i < words; i++) {
+        sum += ntohs(ptr[i]);
+    }
+    
+    // 如果数据长度为奇数，处理最后一个字节
+    if(length & 1) {
+        sum += ((uint16_t)data[length - 1]) << 8;
+    }
+    
+    // 处理进位
+    while(sum >> 16) {
+        sum = (sum & 0xFFFF) + (sum >> 16);
+    }
+    
+    return ~sum;
+}
+
+// 发送RST包
+static void tcp_send_rst(uint32_t dest_ip, uint16_t dest_port,
+                        uint32_t seq, uint32_t ack) __attribute__((unused));
+
+// 实现RST包发送函数
+static void tcp_send_rst(uint32_t dest_ip, uint16_t dest_port,
+                        uint32_t seq, uint32_t ack) {
+    terminal_writestring("\nSending RST packet\n");
+    
+    // 准备发送缓冲区
+    uint8_t buffer[sizeof(struct eth_header) + sizeof(struct ip_header) + sizeof(struct tcp_header)];
+    struct eth_header* eth = (struct eth_header*)buffer;
+    struct ip_header* ip = (struct ip_header*)(eth + 1);
+    struct tcp_header* tcp = (struct tcp_header*)(ip + 1);
+    
+    // 设置以太网头
+    memset(eth->dest, 0, 6);  // 将由ARP解析填充
+    memcpy(eth->src, net_dev.mac_addr, 6);
+    eth->type = htons(ETH_TYPE_IP);
+    
+    // 设置IP头
+    ip->version_ihl = 0x45;
+    ip->tos = 0;
+    ip->total_length = htons(sizeof(struct ip_header) + sizeof(struct tcp_header));
+    ip->id = htons(0);
+    ip->fragment_offset = 0;
+    ip->ttl = 64;
+    ip->protocol = IP_PROTO_TCP;
+    ip->checksum = 0;
+    ip->src_ip = htonl(net_dev.ip_addr);
+    ip->dest_ip = htonl(dest_ip);
+    
+    // 计算IP校验和
+    ip->checksum = network_checksum((const uint8_t *)ip, sizeof(struct ip_header));
+    
+    // 设置TCP头
+    tcp->src_port = htons(1024);  // 使用临时端口
+    tcp->dest_port = htons(dest_port);
+    tcp->seq_num = htonl(seq);
+    tcp->ack_num = htonl(ack);
+    tcp->data_offset = (sizeof(struct tcp_header) / 4) << 4;
+    tcp->flags = TCP_FLAG_RST | TCP_FLAG_ACK;
+    tcp->window = 0;  // RST包通常窗口大小为0
+    tcp->urgent_ptr = 0;
+    tcp->checksum = 0;
+    
+    // 计算TCP校验和
+    tcp->checksum = htons(tcp_checksum(ip, tcp, NULL, 0));
+    
+    // 发送RST包
+    network_send_packet(buffer, sizeof(buffer));
+    
+    terminal_writestring("RST packet sent\n");
+}
+
+// TCP包处理
+void tcp_handle_packet(uint8_t* packet, uint16_t length __attribute__((unused))) {
+    struct ip_header* ip = (struct ip_header*)(packet + sizeof(struct eth_header));
+    struct tcp_header* tcp = (struct tcp_header*)(packet + sizeof(struct eth_header) + sizeof(struct ip_header));
+    
+    terminal_writestring("\nReceived TCP packet:\n");
+    terminal_writestring("Source IP: ");
+    terminal_writehex(ntohl(ip->src_ip));
+    terminal_writestring("\nSource Port: ");
+    terminal_writehex(ntohs(tcp->src_port));
+    terminal_writestring("\nFlags: ");
+    terminal_writehex(tcp->flags);
+    terminal_writestring("\nSeq: ");
+    terminal_writehex(ntohl(tcp->seq_num));
+    terminal_writestring("\nAck: ");
+    terminal_writehex(ntohl(tcp->ack_num));
+    terminal_writestring("\n");
+    
+    // 查找对应的TCP连接
+    struct tcp_connection* conn = NULL;
+    for(int i = 0; i < TCP_MAX_CONNECTIONS; i++) {
+        if(tcp_connections[i].state != TCP_CLOSED &&
+           tcp_connections[i].remote_ip == ntohl(ip->src_ip) &&
+           tcp_connections[i].remote_port == ntohs(tcp->src_port)) {
+            conn = &tcp_connections[i];
+            break;
+        }
+    }
+    
+    // 如果没有找到连接
+    if(!conn) {
+        terminal_writestring("No matching connection found\n");
+        return;
+    }
+    
+    terminal_writestring("Current connection state: ");
+    terminal_writehex(conn->state);
+    terminal_writestring("\n");
+    
+    // 处理TCP标志
+    if(tcp->flags & TCP_FLAG_RST) {
+        terminal_writestring("Received RST\n");
+        tcp_free_connection(conn);
+        return;
+    }
+    
+    // 根据连接状态处理
+    switch(conn->state) {
+        case TCP_SYN_SENT:
+            if((tcp->flags & (TCP_FLAG_SYN | TCP_FLAG_ACK)) == (TCP_FLAG_SYN | TCP_FLAG_ACK)) {
+                terminal_writestring("Received SYN+ACK\n");
+                
+                // 保存序列号和确认号
+                conn->ack_num = ntohl(tcp->seq_num) + 1;
+                conn->seq_num = ntohl(tcp->ack_num);
+                
+                // 发送ACK
+                uint8_t buffer[sizeof(struct eth_header) + sizeof(struct ip_header) + sizeof(struct tcp_header)];
+                struct eth_header* eth = (struct eth_header*)buffer;
+                struct ip_header* ip = (struct ip_header*)(eth + 1);
+                struct tcp_header* tcp = (struct tcp_header*)(ip + 1);
+                
+                // 设置以太网头
+                memset(eth->dest, 0, 6);  // 将由ARP解析填充
+                memcpy(eth->src, net_dev.mac_addr, 6);
+                eth->type = htons(ETH_TYPE_IP);
+                
+                // 设置IP头
+                ip->version_ihl = 0x45;
+                ip->tos = 0;
+                ip->total_length = htons(sizeof(struct ip_header) + sizeof(struct tcp_header));
+                ip->id = htons(0);
+                ip->fragment_offset = 0;  // No fragmentation
+                ip->ttl = 64;
+                ip->protocol = IP_PROTO_TCP;
+                ip->checksum = 0;
+                ip->src_ip = htonl(conn->local_ip);
+                ip->dest_ip = htonl(conn->remote_ip);
+                
+                // 计算IP校验和
+                ip->checksum = network_checksum((const uint8_t *)ip, sizeof(struct ip_header));
+                
+                // 设置TCP头
+                tcp->src_port = htons(conn->local_port);
+                tcp->dest_port = htons(conn->remote_port);
+                tcp->seq_num = htonl(conn->seq_num);
+                tcp->ack_num = htonl(conn->ack_num);
+                tcp->data_offset = (sizeof(struct tcp_header) / 4) << 4;
+                tcp->flags = TCP_FLAG_ACK;
+                tcp->window = htons(8192);
+                tcp->urgent_ptr = 0;
+                tcp->checksum = 0;
+                
+                // 计算TCP校验和
+                tcp->checksum = 0;
+                tcp->checksum = htons(tcp_checksum(ip, tcp, NULL, 0));
+                
+                // 发送ACK
+                terminal_writestring("Sending ACK\n");
+                network_send_packet(buffer, sizeof(buffer));
+                
+                // 更新连接状态
+                conn->state = TCP_ESTABLISHED;
+                terminal_writestring("Connection established\n");
+            } else {
+                terminal_writestring("Unexpected packet in SYN_SENT state\n");
+            }
+            break;
+            
+        case TCP_ESTABLISHED:
+            terminal_writestring("Processing packet in ESTABLISHED state\n");
+            // 处理数据
+            if(tcp->flags & TCP_FLAG_PSH) {
+                uint16_t data_offset = (tcp->data_offset >> 4) * 4;
+                uint16_t data_length = ntohs(ip->total_length) - sizeof(struct ip_header) - data_offset;
+                if(data_length > 0) {
+                    uint8_t* data = packet + sizeof(struct eth_header) + sizeof(struct ip_header) + data_offset;
+                    tcp_handle_data(conn, data, data_length);
+                    
+                    // 发送ACK
+                    conn->ack_num = ntohl(tcp->seq_num) + data_length;
+                    
+                    uint8_t buffer[sizeof(struct eth_header) + sizeof(struct ip_header) + sizeof(struct tcp_header)];
+                    struct eth_header* eth = (struct eth_header*)buffer;
+                    struct ip_header* ip = (struct ip_header*)(eth + 1);
+                    struct tcp_header* tcp = (struct tcp_header*)(ip + 1);
+                    
+                    // 设置以太网头
+                    memset(eth->dest, 0xFF, 6);
+                    memcpy(eth->src, net_dev.mac_addr, 6);
+                    eth->type = htons(ETH_TYPE_IP);
+                    
+                    // 设置IP头
+                    ip->version_ihl = 0x45;
+                    ip->tos = 0;
+                    ip->total_length = htons(sizeof(struct ip_header) + sizeof(struct tcp_header));
+                    ip->id = htons(0);
+                    ip->fragment_offset = 0;  // No fragmentation
+                    ip->ttl = 64;
+                    ip->protocol = IP_PROTO_TCP;
+                    ip->checksum = 0;
+                    ip->src_ip = htonl(conn->local_ip);
+                    ip->dest_ip = htonl(conn->remote_ip);
+                    
+                    // 计算IP校验和
+                    ip->checksum = network_checksum((const uint8_t *)ip, sizeof(struct ip_header));
+                    
+                    // 设置TCP头
+                    tcp->src_port = htons(conn->local_port);
+                    tcp->dest_port = htons(conn->remote_port);
+                    tcp->seq_num = htonl(conn->seq_num);
+                    tcp->ack_num = htonl(conn->ack_num);
+                    tcp->data_offset = (sizeof(struct tcp_header) / 4) << 4;
+                    tcp->flags = TCP_FLAG_ACK;
+                    tcp->window = htons(8192);
+                    tcp->urgent_ptr = 0;
+                    tcp->checksum = 0;
+                    
+                    // 计算TCP校验和
+                    tcp->checksum = 0;
+                    tcp->checksum = htons(tcp_checksum(ip, tcp, NULL, 0));
+                    
+                    // 发送ACK
+                    terminal_writestring("Sending ACK for data\n");
+                    network_send_packet(buffer, sizeof(buffer));
+                }
+            }
+            
+            // 处理FIN
+            if(tcp->flags & TCP_FLAG_FIN) {
+                terminal_writestring("Received FIN\n");
+                conn->ack_num = ntohl(tcp->seq_num) + 1;
+                conn->state = TCP_CLOSE_WAIT;
+                
+                // 发送ACK
+                uint8_t buffer[sizeof(struct eth_header) + sizeof(struct ip_header) + sizeof(struct tcp_header)];
+                struct eth_header* eth = (struct eth_header*)buffer;
+                struct ip_header* ip = (struct ip_header*)(eth + 1);
+                struct tcp_header* tcp = (struct tcp_header*)(ip + 1);
+                
+                // 设置以太网头
+                memset(eth->dest, 0xFF, 6);
+                memcpy(eth->src, net_dev.mac_addr, 6);
+                eth->type = htons(ETH_TYPE_IP);
+                
+                // 设置IP头
+                ip->version_ihl = 0x45;
+                ip->tos = 0;
+                ip->total_length = htons(sizeof(struct ip_header) + sizeof(struct tcp_header));
+                ip->id = htons(0);
+                ip->fragment_offset = 0;  // No fragmentation
+                ip->ttl = 64;
+                ip->protocol = IP_PROTO_TCP;
+                ip->checksum = 0;
+                ip->src_ip = htonl(conn->local_ip);
+                ip->dest_ip = htonl(conn->remote_ip);
+                
+                // 计算IP校验和
+                ip->checksum = network_checksum((const uint8_t *)ip, sizeof(struct ip_header));
+                
+                // 设置TCP头
+                tcp->src_port = htons(conn->local_port);
+                tcp->dest_port = htons(conn->remote_port);
+                tcp->seq_num = htonl(conn->seq_num);
+                tcp->ack_num = htonl(conn->ack_num);
+                tcp->data_offset = (sizeof(struct tcp_header) / 4) << 4;
+                tcp->flags = TCP_FLAG_ACK;
+                tcp->window = htons(8192);
+                tcp->urgent_ptr = 0;
+                tcp->checksum = 0;
+                
+                // 计算TCP校验和
+                tcp->checksum = 0;
+                tcp->checksum = htons(tcp_checksum(ip, tcp, NULL, 0));
+                
+                // 发送ACK
+                terminal_writestring("Sending ACK for FIN\n");
+                network_send_packet(buffer, sizeof(buffer));
+            }
+            break;
+            
+        default:
+            terminal_writestring("Unhandled TCP state: ");
+            terminal_writehex(conn->state);
+            terminal_writestring("\n");
+            break;
+    }
+    
+    // 更新窗口大小
+    conn->window = ntohs(tcp->window);
+}
+
+// TCP定时器处理
+void tcp_handle_timers(void) {
+    for(int i = 0; i < TCP_MAX_CONNECTIONS; i++) {
+        struct tcp_connection_ext* conn = &tcp_connections_ext[i];
+        
+        // 处理重传定时器
+        if(tcp_update_timer(&conn->retransmit_timer)) {
+            // TODO: 重传数据
+        }
+        
+        // 处理TIME_WAIT定时器
+        if(tcp_update_timer(&conn->time_wait_timer)) {
+            tcp_free_connection(&conn->base);
+        }
+        
+        // 处理保活定时器
+        if(tcp_update_timer(&conn->keepalive_timer)) {
+            // TODO: 发送保活探测
+        }
+    }
+}
+
+// TCP初始化
+void tcp_init(void) {
+    // 初始化所有连接
+    for(int i = 0; i < TCP_MAX_CONNECTIONS; i++) {
+        tcp_init_connection(&tcp_connections_ext[i]);
+    }
+}
+
+// TCP连接建立
+int tcp_connect(uint32_t dest_ip, uint16_t dest_port) {
+    terminal_writestring("\n=== TCP Connection Attempt ===\n");
+    terminal_writestring("Checking network status before connect...\n");
+    rtl8139_dump_registers();
+    
+    terminal_writestring("\nConnection Parameters:\n");
+    terminal_writestring("Destination IP: ");
+    terminal_writehex(dest_ip);
+    terminal_writestring("\nDestination Port: ");
+    terminal_writehex(dest_port);
+    terminal_writestring("\nLocal IP: ");
+    terminal_writehex(net_dev.ip_addr);
+    terminal_writestring("\nGateway IP: ");
+    terminal_writehex(net_dev.gateway);
+    terminal_writestring("\n");
+    
+    // 创建新连接
+    struct tcp_connection* conn = tcp_create_connection();
+    if(!conn) {
+        terminal_writestring("Failed to create TCP connection\n");
+        return -1;
+    }
+    
+    // 设置连接参数
+    conn->local_ip = net_dev.ip_addr;
+    conn->remote_ip = dest_ip;
+    conn->local_port = 1024 + (tcp_connections - (struct tcp_connection*)conn);  // 临时端口分配
+    conn->remote_port = dest_port;
+    conn->state = TCP_SYN_SENT;
+    
+    terminal_writestring("\nConnection Details:\n");
+    terminal_writestring("Local IP: ");
+    terminal_writehex(conn->local_ip);
+    terminal_writestring("\nLocal Port: ");
+    terminal_writehex(conn->local_port);
+    terminal_writestring("\nInitial State: TCP_SYN_SENT (0x");
+    terminal_writehex(conn->state);
+    terminal_writestring(")\n");
+    
+    // 获取目标MAC地址
+    uint8_t dest_mac[6];
+    terminal_writestring("\nResolving destination MAC address...\n");
+    if(!get_destination_mac(net_dev.gateway, dest_mac)) {
+        terminal_writestring("Failed to resolve gateway MAC address\n");
+        tcp_free_connection(conn);
+        return -1;
+    }
+    
+    terminal_writestring("Gateway MAC resolved: ");
+    for(int i = 0; i < 6; i++) {
+        terminal_writehex(dest_mac[i]);
+        if(i < 5) terminal_writestring(":");
+    }
+    terminal_writestring("\n");
+    
+    // 准备发送缓冲区
+    uint8_t buffer[sizeof(struct eth_header) + sizeof(struct ip_header) + sizeof(struct tcp_header)];
+    struct eth_header* eth = (struct eth_header*)buffer;
+    struct ip_header* ip = (struct ip_header*)(eth + 1);
+    struct tcp_header* tcp = (struct tcp_header*)(ip + 1);
+    
+    terminal_writestring("\nPreparing TCP SYN packet...\n");
+    
+    // 设置以太网头
+    memcpy(eth->dest, dest_mac, 6);  // 使用解析到的MAC地址
+    memcpy(eth->src, net_dev.mac_addr, 6);
+    eth->type = htons(ETH_TYPE_IP);
+    
+    terminal_writestring("Ethernet Header:\n");
+    terminal_writestring("Destination MAC: ");
+    for(int i = 0; i < 6; i++) {
+        terminal_writehex(eth->dest[i]);
+        if(i < 5) terminal_writestring(":");
+    }
+    terminal_writestring("\nSource MAC: ");
+    for(int i = 0; i < 6; i++) {
+        terminal_writehex(eth->src[i]);
+        if(i < 5) terminal_writestring(":");
+    }
+    terminal_writestring("\n");
+    
+    // 设置IP头
+    ip->version_ihl = 0x45;  // IPv4, 头部长度5个32位字
+    ip->tos = 0;
+    ip->total_length = htons(sizeof(struct ip_header) + sizeof(struct tcp_header));
+    ip->id = htons(0);
+    ip->fragment_offset = 0;  // No fragmentation
+    ip->ttl = 64;
+    ip->protocol = IP_PROTO_TCP;
+    ip->checksum = 0;
+    ip->src_ip = htonl(net_dev.ip_addr);
+    ip->dest_ip = htonl(dest_ip);
+    
+    terminal_writestring("\nIP Header:\n");
+    terminal_writestring("Version/IHL: ");
+    terminal_writehex(ip->version_ihl);
+    terminal_writestring("\nTotal Length: ");
+    terminal_writehex(ntohs(ip->total_length));
+    terminal_writestring("\nTTL: ");
+    terminal_writehex(ip->ttl);
+    terminal_writestring("\nSource IP: ");
+    terminal_writehex(ntohl(ip->src_ip));
+    terminal_writestring("\nDest IP: ");
+    terminal_writehex(ntohl(ip->dest_ip));
+    terminal_writestring("\n");
+    
+    // 计算IP校验和
+    ip->checksum = network_checksum((const uint8_t *)ip, sizeof(struct ip_header));
+    
+    // 设置TCP头
+    tcp->src_port = htons(conn->local_port);
+    tcp->dest_port = htons(dest_port);
+    tcp->seq_num = htonl(0);  // 初始序列号，应该使用随机数
+    tcp->ack_num = 0;
+    tcp->data_offset = (sizeof(struct tcp_header) / 4) << 4;
+    tcp->flags = TCP_FLAG_SYN;
+    tcp->window = htons(8192);  // 初始窗口大小
+    tcp->urgent_ptr = 0;
+    tcp->checksum = 0;
+    
+    terminal_writestring("\nTCP Header:\n");
+    terminal_writestring("Source Port: ");
+    terminal_writehex(ntohs(tcp->src_port));
+    terminal_writestring("\nDest Port: ");
+    terminal_writehex(ntohs(tcp->dest_port));
+    terminal_writestring("\nFlags: ");
+    terminal_writehex(tcp->flags);
+    terminal_writestring("\nWindow: ");
+    terminal_writehex(ntohs(tcp->window));
+    terminal_writestring("\n");
+    
+    // 计算TCP校验和
+    tcp->checksum = 0;
+    tcp->checksum = htons(tcp_checksum(ip, tcp, NULL, 0));
+    
+    terminal_writestring("\n=== Sending SYN Packet ===\n");
+    terminal_writestring("Packet Size: ");
+    terminal_writehex(sizeof(buffer));
+    terminal_writestring("\nTCP Checksum: ");
+    terminal_writehex(ntohs(tcp->checksum));
+    terminal_writestring("\n");
+    
+    // 发送SYN包
+    network_send_packet(buffer, sizeof(buffer));
+    
+    // 等待连接建立
+    terminal_writestring("\n=== Waiting for Connection ===\n");
+    int timeout = 1000;  // 10秒超时
+    int last_state = conn->state;
+    while(conn->state != TCP_ESTABLISHED && timeout > 0) {
+        check_rx_buffer();  // 主动检查接收缓冲区
+        if(conn->state != last_state) {
+            terminal_writestring("State changed: 0x");
+            terminal_writehex(conn->state);
+            terminal_writestring("\n");
+            last_state = conn->state;
+        }
+        if(timeout % 100 == 0) {
+            terminal_writestring("Remaining timeout: 0x");
+            terminal_writehex(timeout);
+            terminal_writestring("\n");
+            // 每100次循环检查一次网络状态
+            rtl8139_dump_registers();
+        }
+        timeout--;
+        io_wait();
+    }
+    
+    if(timeout == 0) {
+        terminal_writestring("\n=== Connection Failed ===\n");
+        terminal_writestring("Final State: 0x");
+        terminal_writehex(conn->state);
+        terminal_writestring("\nTimeout reached\n");
+        tcp_free_connection(conn);
+        return -1;
+    }
+    
+    terminal_writestring("\n=== Connection Established ===\n");
+    return 0;
+} 
