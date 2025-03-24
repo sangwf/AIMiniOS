@@ -1,8 +1,8 @@
 # 编译输出
 *.o
 *.bin
-*.iso
 *.elf
+*.iso
 *.img
 
 # 日志文件
@@ -12,6 +12,7 @@ qemu.log
 
 # 网络转储文件
 *.pcap
+network_dump.pcap
 
 # 临时文件
 *~
